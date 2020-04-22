@@ -1,0 +1,137 @@
+var canvas = document.querySelector('canvas');
+
+canvas.width = window.innerWidth;
+canvas.height = 400;
+
+var c = canvas.getContext('2d');
+
+var dt = 1;
+var n = 2;
+
+var maxM = 1000;
+var maxV = 2;
+var G = 0.0000001;
+
+border = 100;
+
+function Planet(m, x, y, theta, V, index) {
+	this.m = m;
+	this.x = x;
+	this.y = y;
+	this.p_x = V*Math.cos(theta)*this.m;
+	this.p_y = V*Math.sin(theta)*this.m;
+	this.radius = Math.cbrt(m)*2;
+	this.index = index;
+
+	this.draw = function() {
+		c.beginPath();
+		c.arc(this.x, this.y, this.radius, 0, Math.PI*2, true);
+		c.fillStyle = '#f5f5f5';
+		c.fill();
+	}
+
+	this.newton = function() {
+
+		var delta_x = 0;
+		var delta_y = 0;
+		var r = 0;
+		var gravity = 0;
+
+		for (var i = 0; i < planetArray.length; i++) {
+			if (i != this.index) {
+				delta_x = planetArray[i].x - this.x;
+				delta_y = planetArray[i].y - this.y;
+				r = Math.sqrt(delta_x**2 + delta_y**2);
+				gravity = this.m * planetArray[i].m / r**3
+
+				console.log(gravity);
+
+				this.p_x += gravity * delta_x * dt;
+				this.p_y += gravity * delta_y * dt;
+			}
+
+		}
+
+	}
+
+	this.update = function() {
+
+		this.newton();
+
+	 	this.x += this.p_x * dt / this.m;
+	 	this.y += this.p_y * dt / this.m;
+
+	 	this.draw();
+	}
+
+}
+
+var planetArray = [];
+var sigma_mass = 0;
+
+// for (var i = 0; i < 1; i++) {
+// 	planetArray.push(new Planet(
+// 		(Math.exp(-Math.random())) * maxM,
+// 		(Math.random() * (innerWidth - (border * 2))) + border,
+// 		(Math.random() * (innerHeight - (border * 2))) + border,
+// 		Math.random() * Math.PI*2,
+// 		Math.random() * maxV,
+// 		i,
+// 		));
+
+// 	// sigma_mass += planetArray[i].m;
+// }
+
+var phi = Math.random() * Math.PI*2;
+// var speed = Math.random() * maxV;
+
+planetArray.push(new Planet(
+	(Math.exp(-Math.random())) * maxM,
+	(Math.random() * (innerWidth - (border * 2))) + border,
+	(Math.random() * (innerHeight - (border * 2))) + border,
+	phi,
+	Math.random() * maxV,
+	0,
+	));
+
+planetArray.push(new Planet(
+	(Math.exp(-Math.random())) * maxM,
+	(Math.random() * (innerWidth - (border * 2))) + border,
+	(Math.random() * (innerHeight - (border * 2))) + border,
+	-phi,
+	Math.sqrt(planetArray[0].p_x**2+planetArray[0].p_y**2)/planetArray[0].m,
+	1,
+	));
+
+// var R_x = 0;
+// var R_y = 0;
+
+// var r_x = 0;
+// var r_y = 0;
+
+function animate() {
+	requestAnimationFrame(animate);
+	c.clearRect(0, 0 , innerWidth, innerHeight);
+
+	for (var i = 0; i < planetArray.length; i++) {
+		planetArray[i].update();
+	}
+
+	// r_x = 0;
+	// r_y = 0;
+
+	// for (var i = 0; i < planetArray.length; i++) {
+	// 	r_x += planetArray[i].m * planetArray[i].x;
+	// 	r_y += planetArray[i].m * planetArray[i].y;
+	// }
+
+	// R_x = r_x / sigma_mass;
+	// R_y = r_y / sigma_mass;
+
+	// for (var i = 0; i < planetArray.length; i++) {
+	// 	planetArray[i].x -= R_x;
+	// 	planetArray[i].y -= R_y;
+	// } 
+}
+
+animate();
